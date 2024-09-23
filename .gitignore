@@ -1,0 +1,9 @@
+.exrc
+.cache
+.DS_STORE
+build/
+build-em/
+cmake/
+cmake-build-debug/
+
+compile_commands.json
