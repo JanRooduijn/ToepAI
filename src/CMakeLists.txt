@@ -9,7 +9,7 @@ endif()
 #
 ## Main
 
-set(TARGET ggweb-app)
+set(TARGET toepAI-app)
 
 add_executable(${TARGET}
     main.cpp
