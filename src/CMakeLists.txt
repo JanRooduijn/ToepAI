@@ -30,6 +30,8 @@ add_executable(${TARGET}
         backend/ai.cpp
         backend/trick.cpp
         ../include/backend/trick.h
+        backend/move.cpp
+        ../include/backend/move.h
 )
 
 target_include_directories(${TARGET} PUBLIC
