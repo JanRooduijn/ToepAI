@@ -1,16 +1,16 @@
 #pragma once
+#include "game.h"
 #include <random>
 #include <memory>
-#include "game.h"
 
+class Player;
 class Game;
 
 class AI {
 public:
     static AI& getInstance();
-    void play(Game* game, size_t playerIndex);
-
-    void toep(Game *game, size_t playerIndex);
+    void play(Game* game, Player* player);
+    void toep(Game *game, Player* player);
 
 private:
     AI() : g(rd()) {}

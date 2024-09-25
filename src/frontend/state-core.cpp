@@ -82,14 +82,14 @@ void StateCore::render() {
         handSize = ImVec2(4*cardSize.x + 3*cardSpace, cardSize.y);
 
         if (game.size() == 2) {
-            drawPlayer(0, ImVec2(0, wSize.y), ImVec2(0, -1));
-            drawPlayer(1, ImVec2(0, 0), ImVec2(0, 1));
+            drawPlayer(game.getPlayer(0), ImVec2(0, wSize.y), ImVec2(0, -1));
+            drawPlayer(game.getPlayer(1), ImVec2(0, 0), ImVec2(0, 1));
         }
         if (game.size() == 4) {
-            drawPlayer(0, ImVec2(0, wSize.y), ImVec2(0, -1));
-            drawPlayer(1, ImVec2(0, 0), ImVec2(1,0));
-            drawPlayer(2, ImVec2(0, 0), ImVec2(0, 1));
-            drawPlayer(3, ImVec2(wSize.x, 0), ImVec2(-1, 0));
+            drawPlayer(game.getPlayer(0), ImVec2(0, wSize.y), ImVec2(0, -1));
+            drawPlayer(game.getPlayer(1), ImVec2(0, 0), ImVec2(1,0));
+            drawPlayer(game.getPlayer(2), ImVec2(0, 0), ImVec2(0, 1));
+            drawPlayer(game.getPlayer(3), ImVec2(wSize.x, 0), ImVec2(-1, 0));
         }
 
         auto drawList = ImGui::GetWindowDrawList();
@@ -140,12 +140,11 @@ bool StateCore::updatePost() {
 void StateCore::deinitMain() {
 }
 
-void StateCore::drawCard(size_t playerIndex, size_t cardIndex, ImVec2 pos, const ImVec2& dir) {
-    Player& player = game.getPlayer(playerIndex);
-    const Card& card = player.getHand().getCard(cardIndex);
+void StateCore::drawCard(Player* player, size_t cardIndex, ImVec2 pos, const ImVec2& dir) {
+    const Card& card = player->getHand().getCard(cardIndex);
     if (!showFinishedCard && card.state() == Card::State::DONE) return;
 
-    bool isAI = game.getPlayer(playerIndex).isAI();
+    bool isAI = player->isAI();
 
     auto drawList = ImGui::GetWindowDrawList();
     const ImVec2& wSize = rendering.wSize;
@@ -174,11 +173,11 @@ void StateCore::drawCard(size_t playerIndex, size_t cardIndex, ImVec2 pos, const
     bool isHovered = ImGui::IsItemHovered();
 
     int cardAlpha = 255;
-    if (isHovered && !isAI && card.state() == Card::State::INIT && game.getState() == Game::State::PLAY && game.getCurrentPlayer() == playerIndex) cardAlpha = 180;
+    if (isHovered && !isAI && card.state() == Card::State::INIT && game.getState() == Game::State::PLAY && game.getCurrentPlayer() == player) cardAlpha = 180;
     if (card.state() == Card::State::DONE) cardAlpha = 30;
 
-    if (!player.isAI() && ImGui::IsItemHovered() && ImGui::IsMouseJustPressed(0) && card.state() == Card::State::INIT && game.getCurrentPlayer() == playerIndex) {
-        game.playCard(playerIndex, cardIndex);
+    if (!player->isAI() && ImGui::IsItemHovered() && ImGui::IsMouseJustPressed(0) && card.state() == Card::State::INIT && game.getCurrentPlayer() == player) {
+        game.playCard(player, cardIndex);
     }
 
     ImU32 col = IM_COL32(255, 255, 255, cardAlpha);
@@ -251,11 +250,10 @@ void StateCore::drawCardBack(const ImVec2& pos, const ImVec2& dir) {
                       innerBorderColor, rounding - borderThickness, 0, borderThickness);
 }
 
-void StateCore::drawHand(size_t playerIndex, ImVec2 pos, const ImVec2& dir) {
-    Player& player = game.getPlayer(playerIndex);
-    const Hand& hand = player.getHand();
+void StateCore::drawHand(Player* player, ImVec2 pos, const ImVec2& dir) {
+    const Hand& hand = player->getHand();
     for (size_t i = 0; i < hand.size(); ++i) {
-        drawCard(playerIndex, i, pos, dir);
+        drawCard(player, i, pos, dir);
         if (dir.x == 0) pos = ImVec2(pos.x + cardSize.x + cardSpace, pos.y);
         else pos = ImVec2(pos.x, pos.y + cardSize.x + cardSpace);
     }
@@ -294,13 +292,13 @@ void StateCore::drawToepButton(const ImVec2& pos) {
     // Handle the button click
     if (ImGui::IsItemClicked()) {
         // Perform the action when the button is clicked
-        game.toep(0);
+        game.toep(game.getPlayer(0));
     }
 }
 
 
 
-void StateCore::drawPlayer(size_t playerIndex, const ImVec2& pos, const ImVec2& dir) {
+void StateCore::drawPlayer(Player* player, const ImVec2& pos, const ImVec2& dir) {
     const ImVec2& wSize = rendering.wSize;
 
     ImGui::FontSentry sentry(1, wSize.x / 1000 + wSize.y / 1000);
@@ -308,8 +306,8 @@ void StateCore::drawPlayer(size_t playerIndex, const ImVec2& pos, const ImVec2& 
 
     // Draw score
     ImVec2 scoreDist = ImGui::CalcTextSize(tally(5, true).c_str());
-    std::string score = tally(game.getPlayer(playerIndex).score(), dir.x == 0);
-    if (game.getState() == Game::State::TOEP && game.isStartingToeper(playerIndex)) {
+    std::string score = tally(player->score(), dir.x == 0);
+    if (game.getState() == Game::State::TOEP && game.isStartingToeper(player)) {
         std::string prefix = std::string(ICON_MDI_HAND_POINTING_UP) + std::string("+") + "1";
         if (dir.x != 0) prefix += "\n";
         score = score + prefix;
@@ -338,10 +336,10 @@ void StateCore::drawPlayer(size_t playerIndex, const ImVec2& pos, const ImVec2& 
         handPos.x -= handSize.y;
     }
 
-    drawHand(playerIndex, handPos, dir);
+    drawHand(player, handPos, dir);
 
     // Draw toep button if Player is not an AI
-    if (!game.getPlayer(playerIndex).isAI()) {
+    if (!player->isAI()) {
         drawToepButton(ImVec2(handPos.x, textPos.y));
     }
 }

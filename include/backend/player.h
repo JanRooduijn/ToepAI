@@ -1,6 +1,5 @@
 #pragma once
 #include "hand.h"
-#include "ai.h"
 #include <memory>
 
 class Player {

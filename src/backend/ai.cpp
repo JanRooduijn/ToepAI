@@ -6,8 +6,8 @@ AI& AI::getInstance() {
 }
 
 
-void AI::play(Game* game, size_t playerIndex) {
-    Hand hand = game->getPlayer(playerIndex).getHand();
+void AI::play(Game* game, Player* player) {
+    Hand hand = player->getHand();
 
     std::uniform_int_distribution<> dis(0, game->size() - 1);
     size_t firstCard = dis(g);
@@ -21,13 +21,13 @@ void AI::play(Game* game, size_t playerIndex) {
             if (hand.canPlay(leadingSuit) && card.suit() != leadingSuit) continue;
         }
 
-        game->playCard(playerIndex, cardIndex);
+        game->playCard(player, cardIndex);
         break;
     }
 }
 
-void AI::toep(Game* game, size_t playerIndex) {
+void AI::toep(Game* game, Player* player) {
     std::bernoulli_distribution dist(0.5);
     bool call = dist(g);
-    game->playToep(playerIndex, call);
+    game->playToep(player, call);
 }

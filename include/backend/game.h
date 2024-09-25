@@ -1,10 +1,12 @@
 #pragma once
-#include "ai.h"
-#include "player.h"
+#include <optional>
+#include "trick.h"
 #include "deck.h"
+#include "ai.h"
 
-class AI;
 class Player;
+class Hand;
+class AI;
 
 class Game {
 public:
@@ -18,10 +20,10 @@ public:
         ROUND_DONE
     };
 
-    Player& getPlayer(size_t index);
+    Player* getPlayer(size_t index);
     size_t size() const;
     size_t getHandSize() const;
-    size_t getCurrentPlayer() const;
+    Player* getCurrentPlayer() const;
     State getState() const;
 
     void update();
@@ -29,34 +31,33 @@ public:
     void nextPlayer();
     void notifyAI();
 
-    void toep(size_t playerIndex);
+    void toep(Player* player);
+    void playToep(Player* player, bool call);
+    void playCard(Player* player, size_t cardIndex);
 
-    void playToep(size_t playerIndex, bool call);
-
-    void playCard(size_t playerIndex, size_t cardIndex);
     int getWinner();
     size_t getWager();
     std::optional<Card::Suit> getLeadingSuit();
     std::vector<Card*> getCardsInPlay() const;
     void unPause();
 
-    bool isStartingToeper(size_t playerIndex);
+    bool isStartingToeper(Player* player);
 
 private:
     std::vector<Player> players_;
     std::vector<AI> AIs_;
-    std::vector<Card*> cardsInPlay_;
+    std::vector<Trick> tricks_;
     const size_t handSize_;
     Deck deck_;
 
     State state_;
-    size_t roundStarter_;
-    size_t trickStarter_;
-    size_t currentPlayer_;
-    size_t toepStarter_;
-    size_t currentToeper_;
+    Player* roundStarter_;
+    Player* currentPlayer_;
+    Player* toepStarter_;
+    Player* currentToeper_;
     size_t wager_{1};
     size_t activePlayers_;
+    Trick currentTrick_;
 
     void evaluateTrick();
 
@@ -75,4 +76,5 @@ private:
     std::chrono::steady_clock::time_point lastActionTime;
     std::chrono::milliseconds pauseTime{1000};
 
+    int getPlayerIndex(Player* player);
 };
