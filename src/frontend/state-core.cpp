@@ -77,7 +77,8 @@ void StateCore::render() {
         // call after creating the main window
         rendering.init();
 
-        cardSize = ImVec2(0.4f * 0.25f * wSize.x, 0.4f * 0.35f * wSize.x);
+        cardSize.x = std::min(wSize.x / (4 + 4 * 1.4), wSize.y / (4 * 1.4));
+        cardSize.y = 1.4 * cardSize.x;
         cardSpace = cardSize.x / 10;
         handSize = ImVec2(4*cardSize.x + 3*cardSpace, cardSize.y);
 
@@ -164,7 +165,7 @@ void StateCore::drawCard(Player* player, size_t cardIndex, ImVec2 pos, const ImV
         if (it == cardsInPlay.end()) throw std::runtime_error("Card in play not found");
         int index = std::distance(cardsInPlay.begin(), it);
 
-        pos.x = (wSize.x - handSize.x) /2 + index * (cardSize.x + cardSpace);
+        pos.x = (wSize.x - handSize.x) / 2 + index * (cardSize.x + cardSpace);
         pos.y = (wSize.y - cardSize.y) / 2;
     }
 
@@ -327,7 +328,7 @@ void StateCore::drawPlayer(Player* player, const ImVec2& pos, const ImVec2& dir)
 
     // Draw hand
     ImVec2 handPos;
-    if (dir.x == 0) handPos = ImVec2(0.5f * (wSize.x - handSize.x), pos.y + dir.y * 1.5f * scoreDist.y);
+    if (dir.x == 0) handPos = ImVec2(0.5f * (wSize.x - handSize.x), pos.y + dir.y * 0.4f * cardSize.y);
     else handPos = ImVec2(pos.x + dir.x * 1.5f * scoreDist.x, 0.5f * (wSize.y - handSize.y));
     if (dir.y <= 0) {
         handPos.y -= handSize.y;

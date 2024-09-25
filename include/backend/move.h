@@ -4,12 +4,14 @@
 
 class Move {
 public:
-    Move(Player* player, Card* card) : player_(player), card_(card), outcome_(0) {}
+    Move(Player* player, Card* card) : player_(player), card_(card), fold_(0), raise_(0) {}
     Player* getPlayer() const;
     Card* getCard() const;
-    void setOutcome(size_t outcome);
+    void setFold(size_t outcome);
+    void setRaise(size_t raise);
 private:
     Player* player_;
     Card* card_;
-    size_t outcome_;
+    size_t fold_;
+    size_t raise_;
 };

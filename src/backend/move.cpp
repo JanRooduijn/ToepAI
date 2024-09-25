@@ -8,8 +8,11 @@ Card* Move::getCard() const {
     return card_;
 }
 
-void Move::setOutcome(size_t outcome) {
-    outcome_ = outcome;
+void Move::setFold(size_t fold) {
+    fold_ = fold;
 }
 
+void Move::setRaise(size_t raise) {
+    raise_ = raise;
+}
 

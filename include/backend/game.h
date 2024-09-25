@@ -27,7 +27,6 @@ public:
     State getState() const;
 
     void update();
-
     void nextPlayer();
     void notifyAI();
 
@@ -42,6 +41,9 @@ public:
     void unPause();
 
     bool isStartingToeper(Player* player);
+
+    const Trick& getCurrentTrick() const;
+    const size_t getTrickNo() const;
 
 private:
     std::vector<Player> players_;
@@ -66,13 +68,13 @@ private:
     void evaluateToep();
 
     int winner_;
-    size_t trick_;
+    size_t trickNo_;
 
     void dealHands();
     Hand dealHand();
     bool first_;
 
-    bool paused{false};
+    bool paused{true};
     std::chrono::steady_clock::time_point lastActionTime;
     std::chrono::milliseconds pauseTime{1000};
 

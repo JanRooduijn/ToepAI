@@ -147,6 +147,9 @@ bool AppInterface::init(StateSDL& stateSDL, StateCore& stateCore) {
             }
         }
 
+        // update game
+        stateCore.game.update();
+
         // update + render
         {
             if (stateCore.updatePre() == false) {
@@ -246,8 +249,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
                 printf("Main loop exited\n");
                 break;
             }
-
-            game.update();
 
             // update window size
             {

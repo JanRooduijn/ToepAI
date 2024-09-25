@@ -12,9 +12,11 @@ class Trick {
 public:
     void addMove(const Move& move);
     Move* getStartingMove();
-    size_t size();
+    size_t size() const;
     std::vector<Card*> getCards() const;
-    void setOutcome(Player* player, size_t outcome);
+    void setFold(Player* player, size_t fold);
+    void setRaise(Player* player, size_t raise);
+
 
 private:
     std::vector<Move> moves_;

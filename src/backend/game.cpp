@@ -7,7 +7,7 @@
 
 Game::Game(const size_t& playerSize, const size_t& handSize) :
     handSize_(handSize), state_(Game::State::INIT),
-    winner_(-1), trick_(0), first_(true), activePlayers_(0) {
+    winner_(-1), trickNo_(0), first_(true), activePlayers_(0) {
     if (playerSize < 2 || playerSize > 8) throw std::invalid_argument("Invalid player amount");
     if (handSize != 4 && handSize != 8) throw std::invalid_argument("Invalid hand size");
     if (handSize * playerSize > 32) throw std::invalid_argument("Not enough cards");
@@ -25,6 +25,9 @@ Game::Game(const size_t& playerSize, const size_t& handSize) :
     std::uniform_int_distribution<> dis(0, players_.size() - 1);
     roundStarter_ = &players_[dis(g)];
     currentPlayer_ = roundStarter_;
+
+    lastActionTime = std::chrono::steady_clock::now() + pauseTime;
+    paused = true;
 }
 
 Game::State Game::getState() const { return state_; }
@@ -52,8 +55,7 @@ void Game::update() {
 
         case State::TOEP:
             if (currentToeper_ == toepStarter_) {
-                wager_++;
-                state_ = State::PLAY;
+                evaluateToep();
             }
             else if (!currentToeper_->isParticipating()) nextPlayer();
             else notifyAI();
@@ -68,7 +70,7 @@ void Game::update() {
 
             if (activePlayers_ == 1 || tricks_.size() == players_.size()) {
                 closeRound();
-                trick_ = 0;
+                trickNo_ = 0;
                 wager_ = 1;
                 tricks_.clear();
                 dealHands();
@@ -129,7 +131,7 @@ void Game::nextPlayer() {
             break;
 
         default:
-            std::cerr << "Cannot switch to next player, because game is not in play or in toep.";
+            std::cerr << "Cannot switch to next player, because game is not in play or in toep." << std::endl;
     }
 
     lastActionTime = std::chrono::steady_clock::now();
@@ -177,7 +179,7 @@ void Game::playToep(Player* player, bool call) { // perhaps later I will add the
         }
         player->addScore(wager_);
         player->fold();
-        currentTrick_.setOutcome(player, wager_);
+        currentTrick_.setFold(player, wager_);
         activePlayers_--;
     }
     nextPlayer();
@@ -241,8 +243,8 @@ void Game::evaluateTrick() {
     while (!players_[pos].isParticipating()) pos = (pos + 1) % players_.size();
 
     currentPlayer_ = &players_[pos];;
-    trick_++;
-    if (trick_ == players_.size()) {
+    trickNo_++;
+    if (trickNo_ == players_.size()) {
         for (size_t i = 0; i < players_.size(); ++i) {
             if (i != pos && players_[i].isParticipating()) {
                 players_[i].addScore(wager_);
@@ -259,6 +261,7 @@ void Game::closeRound() {
 
 void Game::evaluateToep() {
     wager_++;
+    currentTrick_.setRaise(currentToeper_, wager_);
     state_ = State::PLAY;
 }
 
@@ -287,6 +290,15 @@ void Game::unPause() {
 bool Game::isStartingToeper(Player* player) {
     return toepStarter_ == player;
 }
+
+const Trick& Game::getCurrentTrick() const {
+    return currentTrick_;
+}
+
+const size_t Game::getTrickNo() const {
+    return trickNo_;
+}
+
 
 int Game::getPlayerIndex(Player* player) {
     for (size_t i = 0; i < players_.size(); ++i) {

@@ -12,7 +12,7 @@ Move* Trick::getStartingMove() {
     return &moves_.front();
 }
 
-size_t Trick::size() {
+size_t Trick::size() const {
     return moves_.size();
 }
 
@@ -27,9 +27,16 @@ std::vector<Card*> Trick::getCards() const {
     return cards;
 }
 
-void Trick::setOutcome(Player* player, size_t outcome) {
+void Trick::setFold(Player* player, size_t fold) {
     for (Move& move : moves_) {
-        if (move.getPlayer() == player) move.setOutcome(outcome);
+        if (move.getPlayer() == player) move.setFold(fold);
     }
 }
+
+void Trick::setRaise(Player* player, size_t raise) {
+    for (Move& move : moves_) {
+        if (move.getPlayer() == player) move.setRaise(raise);
+    }
+}
+
 
