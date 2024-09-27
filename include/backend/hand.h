@@ -12,6 +12,10 @@ public:
     [[nodiscard]] std::string toString() const;
     bool canPlay(Card::Suit suit) const;
 
+    int maxFreeValue(Card::Suit suit) const;
+
+    int averageValue() const;
+
 private:
     std::vector<Card> cards_;
 };

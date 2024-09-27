@@ -43,7 +43,8 @@ struct StateCore {
 
     ImVec2 cardSize;
     ImVec2 handSize;
-    float cardSpace;
+    float cardPadding;
+    float scoreFrame;
     bool showFinishedCard = false;
 
     Game& game;
@@ -93,11 +94,11 @@ struct StateCore {
 
     void drawCardBack(const ImVec2 &pos, const ImVec2 &dir);
     void drawHand(Player* player, ImVec2 pos, const ImVec2 &dir);
-    void drawToepButton(const ImVec2 &pos);
+    void drawToepButton(const ImVec2 &pos, const ImVec2 &dir);
 
     void cardsInPlay(ImVec2 pos);
 
-    void drawPlayer(Player* player, const ImVec2 &pos, const ImVec2 &dir);
+    void drawPlayer(Player *player, const ImVec2 &dir);
 
     std::string tally(size_t score, bool horizontal);
 };

@@ -6,29 +6,19 @@ AI& AI::getInstance() {
 }
 
 void AI::play(Game* game, Player* player) {
-    Hand hand = player->getHand();
-    const Trick trick = game->getCurrentTrick();
+    Hand& hand = player->getHand();
+    const Trick& trick = game->getCurrentTrick();
 
     auto leadingSuit = game->getLeadingSuit();
     bool constrainedByLeadingSuit = leadingSuit && hand.canPlay(*leadingSuit);
-    bool canWinAlreadyStartedTrick = false;
-    int maxValue = -1;
-    if (trick.size() > 0) {
-        maxValue = trick.getCards()[0]->value();
-        for (Card* playedCard : trick.getCards()) {
-            maxValue = std::max(maxValue, playedCard->value());
-        }
-        for (size_t i = 0; i < hand.size(); ++i) {
-            if (hand.getCard(i).suit() == leadingSuit && hand.getCard(i).value() > maxValue) canWinAlreadyStartedTrick = true;
-        }
-    }
+    bool canWinAlreadyStartedTrick = trick.size() > 0 && hand.maxFreeValue(trick.getLeadingSuit()) > trick.getMaxValue();
 
     std::vector<size_t> eligibleIndices;
 
     for (size_t i = 0; i < hand.size(); ++i) {
         if (hand.getCard(i).state() != Card::State::INIT) continue;
         if (constrainedByLeadingSuit && hand.getCard(i).suit() != leadingSuit) continue;
-        if (canWinAlreadyStartedTrick && hand.getCard(i).value() < maxValue) continue;
+        if (canWinAlreadyStartedTrick && hand.getCard(i).value() < trick.getMaxValue()) continue;
         eligibleIndices.push_back(i);
     }
 
@@ -58,7 +48,25 @@ void AI::play(Game* game, Player* player) {
 }
 
 void AI::toep(Game* game, Player* player) {
-    std::bernoulli_distribution dist(0.5);
-    bool call = dist(g);
+    const auto& trick = game->getCurrentTrick();
+    auto& hand = player->getHand();
+    bool call = false;
+
+    if (game-> getTrickNo() < 2) {
+        std::bernoulli_distribution dist(hand.averageValue() / 10.0f);
+        call = dist(g);
+    }
+    else {
+        bool hasPlayed = false;
+        for (const auto& playedPlayer : trick.getPlayers()) if (player == playedPlayer) hasPlayed = true;
+
+        if (hasPlayed) {
+            for (const auto& move : trick.getMoves()) {
+                if (player == move.getPlayer() && move.getCard()->value() == trick.getMaxValue()) call = true;
+            }
+        }
+        else if (hand.maxFreeValue(trick.getLeadingSuit()) > trick.getMaxValue()) call = true;
+    }
+
     game->playToep(player, call);
 }

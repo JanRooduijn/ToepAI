@@ -77,20 +77,25 @@ void StateCore::render() {
         // call after creating the main window
         rendering.init();
 
-        cardSize.x = std::min(wSize.x / (4 + 4 * 1.4), wSize.y / (4 * 1.4));
-        cardSize.y = 1.4 * cardSize.x;
-        cardSpace = cardSize.x / 10;
-        handSize = ImVec2(4*cardSize.x + 3*cardSpace, cardSize.y);
+        cardSize.x = wSize.x / 9.2f;
+        cardSize.y = wSize.y / 5.0f;
+        cardSize.x = std::min(cardSize.x, cardSize.y / 1.4f);
+        cardSize.y = std::min(cardSize.y, cardSize.x * 1.4f);
+        cardPadding = cardSize.y * 0.1f;
+        scoreFrame = cardSize.y * 0.9f;
+
+        handSize = ImVec2(4.0f * cardSize.x + 3.0f * cardPadding, cardSize.y);
 
         if (game.size() == 2) {
-            drawPlayer(game.getPlayer(0), ImVec2(0, wSize.y), ImVec2(0, -1));
-            drawPlayer(game.getPlayer(1), ImVec2(0, 0), ImVec2(0, 1));
+            drawPlayer(game.getPlayer(0), ImVec2(0, -1));
+            drawPlayer(game.getPlayer(1), ImVec2(0, 1));
         }
+
         if (game.size() == 4) {
-            drawPlayer(game.getPlayer(0), ImVec2(0, wSize.y), ImVec2(0, -1));
-            drawPlayer(game.getPlayer(1), ImVec2(0, 0), ImVec2(1,0));
-            drawPlayer(game.getPlayer(2), ImVec2(0, 0), ImVec2(0, 1));
-            drawPlayer(game.getPlayer(3), ImVec2(wSize.x, 0), ImVec2(-1, 0));
+            drawPlayer(game.getPlayer(0), ImVec2(0, -1));
+            drawPlayer(game.getPlayer(1), ImVec2(1,0));
+            drawPlayer(game.getPlayer(2), ImVec2(0, 1));
+            drawPlayer(game.getPlayer(3), ImVec2(-1, 0));
         }
 
         auto drawList = ImGui::GetWindowDrawList();
@@ -165,7 +170,7 @@ void StateCore::drawCard(Player* player, size_t cardIndex, ImVec2 pos, const ImV
         if (it == cardsInPlay.end()) throw std::runtime_error("Card in play not found");
         int index = std::distance(cardsInPlay.begin(), it);
 
-        pos.x = (wSize.x - handSize.x) / 2 + index * (cardSize.x + cardSpace);
+        pos.x = (wSize.x - handSize.x) / 2 + index * (cardSize.x + cardPadding);
         pos.y = (wSize.y - cardSize.y) / 2;
     }
 
@@ -255,17 +260,28 @@ void StateCore::drawHand(Player* player, ImVec2 pos, const ImVec2& dir) {
     const Hand& hand = player->getHand();
     for (size_t i = 0; i < hand.size(); ++i) {
         drawCard(player, i, pos, dir);
-        if (dir.x == 0) pos = ImVec2(pos.x + cardSize.x + cardSpace, pos.y);
-        else pos = ImVec2(pos.x, pos.y + cardSize.x + cardSpace);
+        if (dir.x == 0) pos = ImVec2(pos.x + cardSize.x + cardPadding, pos.y);
+        else pos = ImVec2(pos.x, pos.y + cardSize.x + cardPadding);
     }
 }
 
-void StateCore::drawToepButton(const ImVec2& pos) {
+void StateCore::drawToepButton(const ImVec2& pos, const ImVec2& dir) {
     // Define the upward-pointing arrow icon
     const char* buttonText = ICON_MDI_HAND_POINTING_UP;  // Use the upward-pointing arrow icon
 
     // Calculate the size of the text (icon)
     ImVec2 textSize = ImGui::CalcTextSize(buttonText);
+
+    ImVec2& wSize = rendering.wSize;
+    ImVec2 textPos;
+    if (dir.x == 0) textPos = ImVec2(0.5f * (wSize.x - textSize.x), pos.y + dir.y * (0.5 * (0.25f * cardSize.y - textSize.y)));
+    else textPos = ImVec2(pos.x + dir.x * 0.05f * textSize.x, 0.5f * (wSize.y - textSize.y));
+    if (dir.y < 0) {
+        textPos.y -= textSize.y;
+    }
+    if (dir.x < 0) {
+        textPos.x -= textSize.x;
+    }
 
     // Set the cursor position for the invisible button
     ImGui::SetCursorPos(pos);
@@ -299,49 +315,62 @@ void StateCore::drawToepButton(const ImVec2& pos) {
 
 
 
-void StateCore::drawPlayer(Player* player, const ImVec2& pos, const ImVec2& dir) {
+void StateCore::drawPlayer(Player* player, const ImVec2& dir) {
     const ImVec2& wSize = rendering.wSize;
 
     ImGui::FontSentry sentry(1, wSize.x / 1000 + wSize.y / 1000);
     auto drawList = ImGui::GetWindowDrawList();
 
     // Draw score
-    ImVec2 scoreDist = ImGui::CalcTextSize(tally(5, true).c_str());
     std::string score = tally(player->score(), dir.x == 0);
     if (game.getState() == Game::State::TOEP && game.isStartingToeper(player)) {
         std::string prefix = std::string(ICON_MDI_HAND_POINTING_UP) + std::string("+") + "1";
         if (dir.x != 0) prefix += "\n";
         score = score + prefix;
     }
-    ImVec2 textSize = ImGui::CalcTextSize(score.c_str());
-    ImVec2 textPos;
-    if (dir.x == 0) textPos = ImVec2(0.5f * (wSize.x - textSize.x), pos.y + dir.y * 0.2f * scoreDist.y);
-    else textPos = ImVec2(pos.x + dir.x * 0.2f * scoreDist.x, 0.5f * (wSize.y - textSize.y));
-    if (dir.y < 0) {
-        textPos.y -= textSize.y;
+    ImVec2 scoreSize = ImGui::CalcTextSize(score.c_str());
+    ImVec2 scorePos;
+    if (dir.x == 0) { // vertical player
+        scorePos.x = (wSize.x - scoreSize.x) / 2;
+        if (dir.y == 1) scorePos.y = (scoreFrame - scoreSize.y) / 2;
+            if (dir.y == -1) scorePos.y = wSize.y - scoreSize.y - (scoreFrame - scoreSize.y) / 2;
     }
-    if (dir.x < 0) {
-        textPos.x -= textSize.x;
+    if (dir.y == 0) { // horizontal player
+        scorePos.y = (wSize.y - scoreSize.y) / 2;
+        if (dir.x == 1) scorePos.x = (scoreFrame - scoreSize.x) / 2;
+        if (dir.x == -1) scorePos.x = wSize.x - scoreSize.x - (scoreFrame - scoreSize.x) / 2;
     }
     ImU32 black = IM_COL32(0, 0, 0, 255);
-    drawList->AddText(textPos, black, score.c_str());
+    drawList->AddText(scorePos, black, score.c_str());
 
     // Draw hand
     ImVec2 handPos;
-    if (dir.x == 0) handPos = ImVec2(0.5f * (wSize.x - handSize.x), pos.y + dir.y * 0.4f * cardSize.y);
-    else handPos = ImVec2(pos.x + dir.x * 1.5f * scoreDist.x, 0.5f * (wSize.y - handSize.y));
-    if (dir.y <= 0) {
-        handPos.y -= handSize.y;
+    if (dir.x == 0) { // vertical player
+        handPos.x = (wSize.x - handSize.x) / 2;
+        if (dir.y == 1) handPos.y = scoreFrame;
+        if (dir.y == -1) handPos.y = wSize.y - handSize.y - scoreFrame;
     }
-    if (dir.x < 0) {
-        handPos.x -= handSize.y;
+    if (dir.y == 0) { // horizontal player
+        handPos.y = (wSize.y - handSize.x) / 2;
+        if (dir.x == 1) handPos.x = scoreFrame;
+        if (dir.x == -1) handPos.x = wSize.x - handSize.y - scoreFrame;
     }
-
     drawHand(player, handPos, dir);
 
     // Draw toep button if Player is not an AI
     if (!player->isAI()) {
-        drawToepButton(ImVec2(handPos.x, textPos.y));
+        ImVec2 toepButtonPos;
+        toepButtonPos.y = scorePos.y;
+
+        // Calculate the maximum size of the score string
+        std::string scoreIcons;
+        for (int i = 0; i < 5; ++i) {
+            scoreIcons += ICON_MDI_TALLY_MARK_5;
+        }
+        ImVec2 maxScoreSize = ImGui::CalcTextSize(scoreIcons.c_str());
+
+        toepButtonPos.x = (wSize.x - maxScoreSize.x) / 2 - maxScoreSize.x;
+        drawToepButton(toepButtonPos, dir);
     }
 }
 

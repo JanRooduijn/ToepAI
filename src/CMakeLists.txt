@@ -11,6 +11,10 @@ endif()
 
 set(TARGET toepAI-app)
 
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk/usr/include/c++/v1")
+endif()
+
 add_executable(${TARGET}
     main.cpp
         frontend/common.cpp
@@ -46,6 +50,7 @@ target_link_libraries(${TARGET} PRIVATE
 
 make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET}-extra/)
 configure_file(../include/frontend/build-timestamp-tmpl.h ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET}-extra/build-timestamp.h @ONLY)
+
 
 if (EMSCRIPTEN)
     unset(EXTRA_FLAGS)

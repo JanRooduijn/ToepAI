@@ -11,6 +11,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include(cmake/GitVars.cmake)
 include(cmake/BuildTypes.cmake)
 
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk/usr/include/c++/v1")
+endif()
+
 if (EMSCRIPTEN)
     option(GGWEB_WASM_SINGLE_FILE "Embed WASM inside the generated .js" ON)
 else()
@@ -20,6 +24,7 @@ else()
         set(BUILD_SHARED_LIBS_DEFAULT ON)
     endif()
 endif()
+
 
 # options
 

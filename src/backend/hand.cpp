@@ -29,10 +29,26 @@ std::ostream& operator<<(std::ostream& out, Hand& hand) {
 }
 
 bool Hand::canPlay(Card::Suit suit) const {
-    for (size_t i = 0; i < size(); ++i) {
-        if (cards_[i].state() == Card::State::INIT && cards_[i].suit() == suit) {
+    for (const auto& card : cards_) {
+        if (card.state() == Card::State::INIT && card.suit() == suit) {
             return true;
         }
     }
     return false;
+}
+
+int Hand::maxFreeValue(Card::Suit suit) const {
+    int maxValue = 0;
+    for (const auto& card : cards_) {
+        if (card.state() == Card::State::INIT && card.suit() == suit) {
+            maxValue = std::max(maxValue, card.value());
+        }
+    }
+    return maxValue;
+}
+
+int Hand::averageValue() const {
+    int sum = 0;
+    for (const auto& card : cards_) sum += card.value();
+    return sum / cards_.size();
 }
