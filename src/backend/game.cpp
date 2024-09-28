@@ -153,7 +153,11 @@ void Game::notifyAI() {
 
 void Game::toep(Player* player) {
     if (state_ != State::PLAY) {
-        std::cerr << "cannot toep because the game is not in play." << std::endl;
+        std::cerr << "Cannot toep because the game is not in play." << std::endl;
+        return;
+    }
+    if (wager_ >= 3) { // Hardcoded max wager of 3
+        std::cerr << "Cannot toep, because the maximum wager is hardcoded to be 3";
         return;
     }
     state_ = State::TOEP;
@@ -186,8 +190,12 @@ void Game::playToep(Player* player, bool call) { // perhaps later I will add the
 }
 
 void Game::playCard(Player* player, size_t cardIndex) {
+    if (state_ != State::PLAY) {
+        std::cerr << "Cannot play card because the game is not in play." << std::endl;
+        return;
+    }
     if (currentPlayer_ != player) {
-        std::cerr << "it is not Player " <<  std::to_string(getPlayerIndex(player)) << "'s turn." << std::endl;
+        std::cerr << "Cannot play card because it is not Player " <<  std::to_string(getPlayerIndex(player)) << "'s turn." << std::endl;
         return;
     }
     int playerNo = 0;

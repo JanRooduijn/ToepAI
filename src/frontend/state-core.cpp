@@ -369,8 +369,10 @@ void StateCore::drawPlayer(Player* player, const ImVec2& dir) {
         }
         ImVec2 maxScoreSize = ImGui::CalcTextSize(scoreIcons.c_str());
 
-        toepButtonPos.x = (wSize.x - maxScoreSize.x) / 2 - maxScoreSize.x;
-        drawToepButton(toepButtonPos, dir);
+        if (game.getWager() < 3) { // Maximum wager is hardcoded to be 3
+            toepButtonPos.x = (wSize.x - maxScoreSize.x) / 2 - maxScoreSize.x;
+            drawToepButton(toepButtonPos, dir);
+        }
     }
 }
 
