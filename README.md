@@ -10,6 +10,8 @@ The bottom Player is controlled by the user, the other players all follow a heur
 - Only the human player can _toep_ (a.k.a. raise)
 - The maximum wager is 3 points
 
+[Try it out here!](https://janrooduijn.github.io/ToepAI/)
+
 ## Todo
 - Implement _vuile was_
 - Also allow the computer players to _toep_
