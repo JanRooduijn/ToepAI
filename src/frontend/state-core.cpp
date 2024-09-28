@@ -201,7 +201,7 @@ void StateCore::drawCard(Player* player, size_t cardIndex, ImVec2 pos, const ImV
 
     // Draw value
     {
-        ImGui::FontSentry sentry(1, wSize.x / 2000 + wSize.y / 2000);
+        ImGui::FontSentry sentry(1, cardSize.y / 200);
         std::stringstream ss;
         switch (int value = card.value()) {
             case Card::JACK: ss << "J"; break;
@@ -218,7 +218,7 @@ void StateCore::drawCard(Player* player, size_t cardIndex, ImVec2 pos, const ImV
 
     // Draw suit
     {
-        ImGui::FontSentry sentry(1, wSize.x / 1000 + wSize.y / 1000);
+        ImGui::FontSentry sentry(1, cardSize.y / 100);
         std::stringstream ss;
         switch (int value = card.suit()) {
             case Card::CLUBS: ss << ICON_MDI_CARDS_CLUB; break;
