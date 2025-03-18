@@ -1,0 +1,2 @@
+/usr/bin/ar qc libimgui-sdl2.a "CMakeFiles/imgui-sdl2.dir/imgui-extra/imgui_impl.cpp.o" "CMakeFiles/imgui-sdl2.dir/imgui/backends/imgui_impl_sdl.cpp.o" "CMakeFiles/imgui-sdl2.dir/imgui/backends/imgui_impl_opengl3.cpp.o"
+/usr/bin/ranlib libimgui-sdl2.a

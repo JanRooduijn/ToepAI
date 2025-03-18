@@ -8,8 +8,8 @@ enable_testing()
 set(CMAKE_EXPORT_COMPILE_COMMANDS "on")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include(cmake/GitVars.cmake)
-include(cmake/BuildTypes.cmake)
+include(client/cmake/GitVars.cmake)
+include(client/cmake/BuildTypes.cmake)
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -I/Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk/usr/include/c++/v1")
@@ -57,6 +57,10 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+include_directories(${Boost_INCLUDE_DIRS})
+
+
 if (EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS " \
     -s USE_SDL=2 \
@@ -73,7 +77,7 @@ else()
     string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
 endif()
 
-add_subdirectory(third-party)
+add_subdirectory(client/third-party)
 
 # main
 
@@ -82,4 +86,5 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
 endif ()
 
-add_subdirectory(src)
+add_subdirectory(client)
+add_subdirectory(server)
